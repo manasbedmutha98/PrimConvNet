@@ -8,9 +8,6 @@ struct tensor( int _x, int _y, int _z )
 
 		tdsize size;
 		float* data;
-
-
-		data = malloc(_x * _y * _z*sizeof(float));
 		size.x = _x;
 		size.y = _y;
 		size.z = _z;
@@ -19,14 +16,25 @@ struct tensor( int _x, int _y, int _z )
 
 //defining a method to input a tensor into another tensor
 
- struct tensor load_tensor( struct tensor input)
+ struct tensor* init(x,y,z)	
+ struct tensor * load_tensor( struct tensor * input)
 	{
-		t->data = malloc(input.size.x *input.size.y *input.size.z*sizeof(float));
-		memcpy(
-			t->data,
-			input.data,
-			input.size.x *input.size.y *input.size.z * sizeof( T )
-		);
+		struct tensor * t = malloc(sizeof(*input));
+		t->size.x = input-size.x;
+		t->size.y = input-size.y;
+		t->size.z = input-size.z;
+
+
+
+
+
+		
+		t->data = malloc((input->size.x * input->size.y * input->size.z *sizeof(float));
+
+	    for ( int i = 0; i < t.size.x * t.size.y * t.size.z; i++ )
+			{
+
+			}
 		t->size = other.size;
 
 	}
