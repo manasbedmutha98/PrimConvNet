@@ -13,10 +13,10 @@ struct gradient_t
 	
 };
 
-struct gradient_t * initialize(int grad, int oldgrad){
+struct gradient_t * init_grad(){
 	struct gradient_t * gradtsr; 
 	//= malloc(sizeof(gradient_t));
-	gradtsr->grad = grad;
-	gradtsr->oldgrad = oldgrad;
+	gradtsr->grad = 0;
+	gradtsr->oldgrad = 0;
 	return gradtsr;
 }
