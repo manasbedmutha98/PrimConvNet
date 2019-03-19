@@ -5,6 +5,15 @@
 
 //#pragma pack(push, 1)
 
+typedef struct filters{
+	int size;
+	tensor_t * coeffs;
+} filters;
+
+struct filter_grads{
+	//
+};
+
 typedef struct conv_layer_t
 {
 	int type;
@@ -19,7 +28,10 @@ typedef struct conv_layer_t
 
 //9K0CRR-7SR9J9-XD7X7G-G02W03
 
-conv_layer_t init( uint16_t stride, uint16_t extend_filter, uint16_t number_filters, tdsize in_size ){
+uint16_t stride, extend_filter, number_filters;
+tdsize in_size;
+
+conv_layer_t init( uint16_t stride_l, uint16_t extend_filter_l, uint16_t number_filters_l, tdsize in_size_l ){
 	
 	// :
 	// conv_layer_t 
@@ -30,8 +42,11 @@ conv_layer_t init( uint16_t stride, uint16_t extend_filter, uint16_t number_filt
 	// 	(in_size.y - extend_filter) / stride + 1,
 	// 	number_filters
 	// )
+	stride = stride_l;
+	extend_filter = extend_filter_l;
+	number_filters = number_filters_l;
+	in_size = in_size_l;
 
-	//tdsize in_size;
 	in_size.x=3;
 	in_size.y=3;
 	in_size.z=3;
@@ -57,28 +72,37 @@ conv_layer_t init( uint16_t stride, uint16_t extend_filter, uint16_t number_filt
 
 	for ( int a = 0; a < number_filters; a++ )
 	{
-		tensor_t t( extend_filter, extend_filter, in_size.z );
+		//Should allocate tensor of dims as parameters as
+		// tensor_t t(extend_filter, extend_filter, in_size.z);
+		//Currently assigning locally as malloc
+
+		tensor_t * t = malloc(sizeof(tensor_t));
+		t->data = malloc(sizeof(float)*extend_filter*extend_filter*in_size.z);
 
 		int maxval = extend_filter * extend_filter * in_size.z;
-
-		for ( int i = 0; i < extend_filter; i++ )
-			for ( int j = 0; j < extend_filter; j++ )
-				for ( int z = 0; z < in_size.z; z++ )
-					t( i, j, z ) = 1.0f / maxval * rand() / float( RAND_MAX );
-		filters.push_back( t );
+		printf("%d",maxval);
+		for (int i = 0; i < extend_filter; i++)
+			for (int j = 0; j < extend_filter; j++)
+				for (int z = 0; z < in_size.z; z++)
+					//t(i, j, z) = 1.0f / maxval * rand() / float( RAND_MAX );
+					//Assume rand max is 100
+					t->data[(extend_filter*i+j)*extend_filter+in_size.z] = 1.0f/maxval*rand();///float(100)
+		//Add this
+		//filters.push_back( t );
 	}
-	for ( int i = 0; i < number_filters; i++ )
-	{
-		tensor_t<gradient_t> t( extend_filter, extend_filter, in_size.z );
-		filter_grads.push_back( t );
-	}
+	//Figure this out
+	// for ( int i = 0; i < number_filters; i++ )
+	// {
+	// 	tensor_t<gradient_t> t( extend_filter, extend_filter, in_size.z );
+	// 	filter_grads.push_back( t );
+	// }
 
 }
 
-/*
+
 
 	
-tdsize map_to_input( tdsize out, int z, int stride)
+struct tdsize map_to_input(tdsize out, int z, int stride)
 {
 	out.x *= stride;
 	out.y *= stride;
@@ -92,37 +116,37 @@ typedef struct range_t
 	int max_x, max_y, max_z;
 } range_t;
 
-int normalize_range( float f, int max, int lim_min=0)
+int normalize_range(float f, int max, int lim_min)
 {
-	if ( f <= 0 )
+	if (f <=0)
 		return 0;
 	max -= 1;
-	if ( f >= max )
+	if (f>= max)
 		return max;
 
-	if ( lim_min ) // left side of inequality
-		return ceil( f );
+	if (lim_min>0) // left side of inequality
+		return ceil(f);
 	else
-		return floor( f );
+		return floor(f);
 }
 
-range_t map_to_output( int x, int y )
+range_t map_to_output(int x, int y)
 {
 	float a = x;
 	float b = y;
 	range_t output_range =
 	{
-		normalize_range( (a - extend_filter + 1) / stride, out.size.x, true ),
-		normalize_range( (b - extend_filter + 1) / stride, out.size.y, true ),
+		normalize_range((a-extend_filter + 1) / stride, out.size.x, 1),
+		normalize_range((b-extend_filter + 1) / stride, out.size.y,1),
 		0,
-		normalize_range( a / stride, out.size.x, false ),
-		normalize_range( b / stride, out.size.y, false ),
+		normalize_range(a / stride, out.size.x, 0),
+		normalize_range(b / stride, out.size.y, 0),
 		(int)filters.size() - 1,
 	};
 	return output_range;
 }
 ///
-	void activate( tensor_t<float>& in )
+	void activate(tensor_t& in )
 	{
 		this->in = in;
 		activate();
@@ -137,17 +161,17 @@ range_t map_to_output( int x, int y )
 			{
 				for ( int y = 0; y < out.size.y; y++ )
 				{
-					point_t mapped = map_to_input( { (uint16_t)x, (uint16_t)y, 0 }, 0 );
+					point_t mapped = map_to_input({(uint16_t)x, (uint16_t)y, 0 }, 0);
 					float sum = 0;
 					for ( int i = 0; i < extend_filter; i++ )
 						for ( int j = 0; j < extend_filter; j++ )
 							for ( int z = 0; z < in.size.z; z++ )
 							{
 								float f = filter_data( i, j, z );
-								float v = in( mapped.x + i, mapped.y + j, z );
+								float v = in(mapped.x + i, mapped.y + j, z);
 								sum += f*v;
 							}
-					out( x, y, filter ) = sum;
+					out(x, y, filter) = sum;
 				}
 			}
 		}
