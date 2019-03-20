@@ -5,13 +5,14 @@
 
 //#pragma pack(push, 1)
 
-typedef struct filters{
-	int size;
-	tensor_t * coeffs;
-} filters;
+struct filts{
+	tensor_t ** coeffs;
+} filts;
 
 struct filter_grads{
 	//
+	gradient_t grads;
+	tensor ** f;
 };
 
 typedef struct conv_layer_t
@@ -20,6 +21,7 @@ typedef struct conv_layer_t
 	tensor_t * grads_in;
 	tensor_t * in;
 	tensor_t * out;
+	filts * filters;
 	//std::vector<tensor_t> filters;
 	//std::vector<tensor_t<gradient_t>> filter_grads;
 	uint16_t stride;
