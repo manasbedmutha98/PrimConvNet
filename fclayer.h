@@ -114,11 +114,9 @@ void activate(struct fc_layer* fclayer) //why are there 2 activate functions??
 						float* w = get( m, n, 0,fclayer->weights );
 						*w = update_weight( *w, grad, i, get(i,j, z ,fclayer->in));// update_weight function of different file
 					}
-
 			update_gradient( grad ); //function of different file 
 		}
 	}
-
 	void calc_grads( struct tensor* grad_next_layer ,struct fc_layer* fclayer)
 	{
 		memset( fclayer->grads_in->data, 0, fclayer->grads_in->size->x *fclayer->grads_in->size->y*fclayer->grads_in->size->z * sizeof( float ) );
@@ -126,7 +124,6 @@ void activate(struct fc_layer* fclayer) //why are there 2 activate functions??
 		{
 			struct gradient_t*  slope = *((fclayer->gradients)+n); // gradient structure
 			slope->grad = *(get(n, 0, 0, grad_next_layer))  * activator_derivative( ((fclayer->input)+n) ); // acitvating using the pointer to the nth input//what deos grad.grad mean
-
 			for ( int i = 0; i < fclayer->in->size->x; i++ )
 				for ( int j = 0; j < fclayer->in->size->y; j++ )
 					for ( int z = 0; z < fclayer->in->size->z; z++ )
@@ -139,6 +136,5 @@ void activate(struct fc_layer* fclayer) //why are there 2 activate functions??
 					}
 		}
 	}
-
 */
 #pragma pack(pop)
