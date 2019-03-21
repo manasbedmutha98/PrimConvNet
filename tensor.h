@@ -6,7 +6,7 @@
 struct tensor
 	{
 
-		tdsize size;
+		tdsize* size;
 		float* data;
 	};
 
@@ -17,9 +17,9 @@ struct tensor
  {
  	struct tensor * t = malloc(sizeof(struct tensor*));
     t->data = malloc((x *y *z*sizeof(float)));
-	t->size.x = x;
-	t->size.y = y;
-	t->size.z = z;
+	t->size->x = x;
+	t->size->y = y;
+	t->size->z = z;
 
 	return t;
  }
@@ -28,10 +28,10 @@ struct tensor
 	{
 		struct tensor* t;
 
-		t = init_tensor(input->size.x,input->size.y,input->size.z);
+		t = init_tensor(input->size->x,input->size->y,input->size->z);
 		
 
-	    for ( int i = 0; i < t->size.x * t->size.y * t->size.z; i++ )
+	    for ( int i = 0; i < t->size->x * t->size->y * t->size->z; i++ )
 			{
 
 				*((t->data)+i) = *((input->data)+i);
@@ -46,9 +46,9 @@ struct tensor
 	{	
 		struct tensor* t_sum;
 
-		t_sum = init_tensor(t->size.x,t->size.y,t->size.z);
+		t_sum = init_tensor(t->size->x,t->size->y,t->size->z);
 		
-		for ( int i = 0; i < t->size.x * t->size.y * t->size.z; i++ )
+		for ( int i = 0; i < t->size->x * t->size->y * t->size->z; i++ )
 			*((t_sum->data)+i) = *((t->data)+i)+*((other->data)+i);
 		
 		return t_sum;
@@ -58,10 +58,10 @@ struct tensor
 	struct tensor* subtract_tensor( struct tensor* t, struct tensor* other)
 	{	
 		struct tensor* t_sub;
-		t_sub = init_tensor(t->size.x,t->size.y,t->size.z);
-		t_sub->data = malloc(t->size.x* t->size.x* t->size.x);
+		t_sub = init_tensor(t->size->x,t->size->y,t->size->z);
+		t_sub->data = malloc(t->size->x* t->size->x* t->size->x);
 
-		for ( int i = 0; i < t->size.x* t->size.y* t->size.z; i++ )
+		for ( int i = 0; i < t->size->x* t->size->y* t->size->z; i++ )
 			*((t_sub->data)+i) = *((t->data)+i) - *((other->data)+i);
 		return t_sub;
 	}	
@@ -72,11 +72,11 @@ struct tensor
 	{	
 
 		assert( _x >= 0 && _y >= 0 && _z >= 0 );
-		assert( _x < t->size.x && _y < t->size.y && _z < t->size.z );
+		assert( _x < t->size->x && _y < t->size->y && _z < t->size->z );
 
 		return ((t->data)+
-			_z * (t->size.x * t->size.y) +
-				_y * (t->size.x) +
+			_z * (t->size->x * t->size->y) +
+				_y * (t->size->x) +
 				_x);       
 	}
 
@@ -96,4 +96,4 @@ struct tensor
 				get(i,j,k,t) = vector_3D[k][j][i];
 	return t;
 }
-/*
+*/
