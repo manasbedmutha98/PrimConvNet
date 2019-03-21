@@ -12,11 +12,11 @@
 struct fc_layer
 {
 	//layer_type type = layer_typefc; // check how to write this with manas
-	struct tensor* grads_in;
-	struct tensor* in;
-	struct tensor* out;
-	struct tensor* weights; // 
-	struct gradient** gradients ;  // initializing a pointer to an array of pointers to the gradient 
+	struct tensor_t* grads_in;
+	struct tensor_t* in;
+	struct tensor_t* out;
+	struct tensor_t* weights; // 
+	struct gradient_t** gradients ;  // initializing a pointer to an array of pointers to the gradient 
 	float*    input;
 };
 
@@ -24,25 +24,31 @@ struct fc_layer
 //function to initialize the fc_layer
 struct fc_layer* init_fclayer(tdsize* in_size, int out_size )
 {		
-		struct fc_layer* layer = malloc(sizeof(struct fc_layer));
-        layer->in 			= init_tensor( in_size->x, in_size->y, in_size->z ); // initializing the input tensor 
-		layer->out 			= init_tensor( out_size, 1, 1 );
-		layer->grads_in 	= init_tensor( in_size->x, in_size->y, in_size->z );
-		layer->weights    	= init_tensor( in_size->x*in_size->y*in_size->z, out_size, 1 );
+	struct fc_layer* layer = malloc(sizeof(struct fc_layer));
+    layer->in 			= init_tensor( in_size->x, in_size->y, in_size->z ); // initializing the input tensor 
+	layer->out 			= init_tensor( out_size, 1, 1 );
+	layer->grads_in 	= init_tensor( in_size->x, in_size->y, in_size->z );
+	layer->weights    	= init_tensor( in_size->x*in_size->y*in_size->z, out_size, 1 );
 
-		layer->gradients = malloc(out_size*sizeof(struct gradient*)); // allocating  memory to the array of pointer (check if the statement is fine)
+	layer->gradients = malloc(out_size*sizeof(struct gradient*)); // allocating  memory to the array of pointer (check if the statement is fine)
 
 
-		int maxval = in_size->x * in_size->y * in_size->z;
+	int maxval = in_size->x * in_size->y * in_size->z;
 
-		for ( int i = 0; i < out_size; i++ )
-		{
-			//((layer->input)+i) = malloc(sizeof(float)); // allocating memory for each element in the array of floats(giving error,check)
-			*((layer->gradients)+i) = malloc(2*sizeof(float)); // allocating memory  for each element in the array of gradients
-			for ( int h = 0; h < in_size->x*in_size->y*in_size->z; h++ )
-				*(get (h, i, 0 ,layer->weights)) = 2.19722f / maxval * rand() / ((float) RAND_MAX );
-		}// 2.19722f = f^-1(0.9) => x where [1 / (1 + exp(-x) ) = 0.9]
-	}
+	for ( int i = 0; i < out_size; i++ )
+	{	
+
+		//((layer->input)+i) = malloc(sizeof(float)); // allocating memory for each element in the array of floats(giving error,check)
+		*((layer->gradients)+i) = malloc(2*sizeof(float)); // allocating memory  for each element in the array of gradients
+		for ( int h = 0; h < in_size->x*in_size->y*in_size->z; h++ ){
+			//*(get (h, i, 0 ,layer->weights) = 2.19722f / maxval * rand() / ((float) RAND_MAX ));
+			float * init_ptr = get(h, i, 0 ,layer->weights);
+			*init_ptr = 2.19722f/maxval*rand()/((float) RAND_MAX ); ;
+		}
+	}// 2.19722f = f^-1(0.9) => x where [1 / (1 + exp(-x) ) = 0.9]
+
+	return layer;
+}
 
 
 float activator_function( float x )
@@ -61,38 +67,46 @@ float activator_derivative( float x )
 	}
 
 
-void activate( struct tensor** in, struct fc_layer* fclayer )
-	{   
-		fclayer->in = in;
-		activate(); //how to use activate function
-	}
+// void activate( struct tensor* in, struct fc_layer* fclayer )
+// 	{   
+// 		fclayer->in =  load_tensor( in);
+// 		activate(); //how to use activate function
+// 	}
 
 int map( tdsize* d ,struct fc_layer* fclayer) //point also must be converted to a pointer??
-	{
-		return d->z * ((fclayer->in)->size->x * (fclayer->in)->size->y) +
-			d->y * ((fclayer->in)->size->x) +
+	{	
+
+		int x0 = fclayer->in->size->x;
+		int y0 = fclayer->in->size->y;
+
+		return d->z * ( x0*y0 ) +
+		d->y * (x0) +
 			d->x;
 	}
 
-void activate(struct fc_layer* fclayer) //why are there 2 activate functions??
+void activate(struct tensor_t* in, struct fc_layer* fclayer) //why are there 2 activate functions??
 	{
+		fclayer->in =  load_tensor(in);
 		for ( int n = 0; n < (fclayer->out)->size->x; n++ )
 		{
 			float inputv = 0;
 			for ( int i = 0; i < (fclayer->in)->size->x; i++ ) // attribute of fc layer,in is a pointer pointing to the pointer to a tensor with attribute size
-				for ( int j = 0; j < ((fclayer->in))->size->y; j++ )
-					for ( int z = 0; z < ((fclayer->in)+n)->size->z; z++ )
+				for ( int j = 0; j < fclayer->in->size->y; j++ )
+					for ( int z = 0; z < fclayer->in->size->z; z++ )
 					{	tdsize* point;
 						point->x = i;
 						point->y =j;
 						point->z = z;
 						int m = map( point, fclayer );
-						inputv += (*(get( i, j, z,(fclayer->in)))) * (*(get( m, n, 0,fclayer->weights )));
+						float* input_p= (get( i, j, z,(fclayer->in)));
+						float* weight_p = (get( m, n, 0,fclayer->weights));
+						inputv += *input_p * *weight_p;
 					}
 
 		*((fclayer->input)+n) = inputv; //input seems to be an array of structures
+		float* p = get( n, 0, 0,fclayer->out ) ;
 
-			*(get( n, 0, 0,fclayer->out )) = activator_function( inputv ); //what is the type pf input v??
+			* p= activator_function( inputv ); //what is the type pf input v??
 		}
 	}
 

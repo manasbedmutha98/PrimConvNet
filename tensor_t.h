@@ -1,126 +1,96 @@
-#include<stdio.h>
+#include <stdlib.h>
 #include "point_t.h"
 
-typedef struct tensor_t{
-	float * data;
-	tdsize size;
-} tensor_t;
 
-// #pragma once
-// #include "point_t.h"
-// #include <cassert>
-// //#include <vector>
-// #include <string.h>
+//defining the structre for initialization method1
 
-// //template<typename T>
-// struct tensor_t
-// {
-// 	float * data;
+//Manas: Defining typedef for now; will refactor later
+typedef struct tensor_t
+	{
 
-// 	tdsize size;
-
-// 	tensor_t( int _x, int _y, int _z )
-// 	{
-// 		data = new float[_x * _y * _z];
-// 		size.x = _x;
-// 		size.y = _y;
-// 		size.z = _z;
-// 	}
-
-// 	tensor_t( const tensor_t& other )
-// 	{
-// 		data = new T[other.size.x *other.size.y *other.size.z];
-// 		memcpy(
-// 			this->data,
-// 			other.data,
-// 			other.size.x *other.size.y *other.size.z * sizeof(float)
-// 		);
-// 		this->size = other.size;
-// 	}
-
-// 	tensor_t operator+( tensor_t<T>& other )
-// 	{
-// 		tensor_t clone( *this );
-// 		for ( int i = 0; i < other.size.x * other.size.y * other.size.z; i++ )
-// 			clone.data[i] += other.data[i];
-// 		return clone;
-// 	}
-
-// 	tensor_t operator-( tensor_t<T>& other )
-// 	{
-// 		tensor_t<T> clone( *this );
-// 		for ( int i = 0; i < other.size.x * other.size.y * other.size.z; i++ )
-// 			clone.data[i] -= other.data[i];
-// 		return clone;
-// 	}
-
-// 	float& operator()( int _x, int _y, int _z )
-// 	{
-// 		return this->get( _x, _y, _z );
-// 	}
-
-// 	float& get( int _x, int _y, int _z )
-// 	{
-// 		assert( _x >= 0 && _y >= 0 && _z >= 0 );
-// 		assert( _x < size.x && _y < size.y && _z < size.z );
-
-// 		return data[
-// 			_z * (size.x * size.y) +
-// 				_y * (size.x) +
-// 				_x
-// 		];
-// 	}
-
-// 	void copy_from( std::vector<std::vector<std::vector<T>>> data )
-// 	{
-// 		int z = data.size();
-// 		int y = data[0].size();
-// 		int x = data[0][0].size();
-
-// 		for ( int i = 0; i < x; i++ )
-// 			for ( int j = 0; j < y; j++ )
-// 				for ( int k = 0; k < z; k++ )
-// 					get( i, j, k ) = data[k][j][i];
-// 	}
-
-// 	~tensor_t()
-// 	{
-// 		delete[] data;
-// 	}
-// };
-
-// static void print_tensor( tensor_t<float>& data )
-// {
-// 	int mx = data.size.x;
-// 	int my = data.size.y;
-// 	int mz = data.size.z;
-
-// 	for ( int z = 0; z < mz; z++ )
-// 	{
-// 		printf( "[Dim%d]\n", z );
-// 		for ( int y = 0; y < my; y++ )
-// 		{
-// 			for ( int x = 0; x < mx; x++ )
-// 			{
-// 				printf( "%.2f \t", (float)data.get( x, y, z ) );
-// 			}
-// 			printf( "\n" );
-// 		}
-// 	}
-// }
-
-// static tensor_t<float> to_tensor( std::vector<std::vector<std::vector<float>>> data )
-// {
-// 	int z = data.size();
-// 	int y = data[0].size();
-// 	int x = data[0][0].size();
+		tdsize* size;
+		float* data;
+	} tensor_t;
 
 
-// 	tensor_t<float> t( x, y, z );
+//defining a method to input a tensor into another tensor
 
-// 	for ( int i = 0; i < x; i++ )
-// 		for ( int j = 0; j < y; j++ )
-// 			for ( int k = 0; k < z; k++ )
-// 				t( i, j, k ) = data[k][j][i];
-// 	return t;
-// }
+ struct tensor_t* init_tensor(x,y,z)	
+ {
+ 	struct tensor_t * t = malloc(sizeof(struct tensor_t*));
+    t->data = malloc((x *y *z*sizeof(float)));
+	t->size->x = x;
+	t->size->y = y;
+	t->size->z = z;
+
+	return t;
+ }
+
+ struct tensor_t * load_tensor( struct tensor_t * input)
+	{
+		struct tensor_t* t;
+
+		t = init_tensor(input->size->x, input->size->y, input->size->z);
+		
+
+	    for ( int i = 0; i < t->size->x * t->size->y * t->size->z; i++ )
+			{
+
+				*((t->data)+i) = *((input->data)+i);
+			}
+		
+		return t;
+	}
+	
+
+//Adding the the elements of the tensors
+   struct tensor_t* add_tensor( struct tensor_t* t, struct tensor_t* other)
+	{	
+		struct tensor_t* t_sum;
+
+		t_sum = init_tensor(t->size->x,t->size->y,t->size->z);
+		
+		for ( int i = 0; i < t->size->x * t->size->y * t->size->z; i++ )
+			*((t_sum->data)+i) = *((t->data)+i)+*((other->data)+i);
+		
+		return t_sum;
+	}	
+
+//subtracting the elements of t from other
+	struct tensor_t* subtract_tensor( struct tensor_t* t, struct tensor_t* other)
+	{	
+		struct tensor_t* t_sub;
+		t_sub = init_tensor(t->size->x,t->size->y,t->size->z);
+		t_sub->data = malloc(t->size->x* t->size->x* t->size->x);
+
+		for ( int i = 0; i < t->size->x* t->size->y* t->size->z; i++ )
+			*((t_sub->data)+i) = *((t->data)+i) - *((other->data)+i);
+		return t_sub;
+	}	
+
+// "get" function takes in the coordinates of the point to be obtianed in the tensor and the tensor itslef , returning the memory add
+// of the point
+	float* get( int _x, int _y, int _z, struct tensor_t* t )
+	{	
+
+		assert(_x >= 0 && _y >= 0 && _z >= 0);
+		assert(_x < t->size->x && _y < t->size->y && _z < t->size->z);
+
+		return ((t->data)+_z * (t->size->x * t->size->y) +_y * (t->size->x) +_x);       
+	}
+
+
+// Loading the values of a 3D tensor into a tensor
+/*static struct tensor* to_tensor( float* vector_3D, int x,y,z )
+{	
+	   //tensor in which 3D vector is to be loaded
+	
+	  
+	struct tensor* t =  init_tensor(x,y,z); // tensor into which the array will be loaded is initialized
+	for ( int i = 0; i < x; i++ )
+		for ( int j = 0; j < y; j++ )
+			for ( int k = 0; k < z; k++ )
+				get(i,j,k,t) = vector_3D[k][j][i];
+	return t;
+}
+*/
